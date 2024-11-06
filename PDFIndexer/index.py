@@ -1,7 +1,7 @@
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from PyPDF2.generic._base import IndirectObject
+from PyPDF2 import PdfReader, PdfWriter
 from dataclasses import dataclass
-from typing import List, Union, Self
+from typing import List, Union
+from pprint import pprint
 
 Path = str
 nullInt = Union[int, None]
@@ -20,7 +20,7 @@ class IndexItem:
 
 def add_index(input: Path, output: Path, index: List[IndexItem]):
     writer = generate_pdf_copy(input)
-    current_level = 0
+    current_level = -1
     bookmark_hierarquy = []
     bookmark = None
     for item in index:
@@ -47,20 +47,20 @@ def add_index_offset(index: List[IndexItem], offset: int) -> List[IndexItem]:
     return new_index
 
 
-def generate_pdf_copy(input: Path) -> PdfFileWriter:
-    reader = PdfFileReader(input)
-    writer = PdfFileWriter()
+def generate_pdf_copy(input: Path) -> PdfWriter:
+    reader = PdfReader(input)
+    writer = PdfWriter()
     for page in reader.pages:
-        writer.addPage(page)
+        writer.add_page(page)
     return writer
 
 
-def read_index(file: Path) -> list:
+def read_index(file: Path) -> List[IndexItem]:
     with open(file, "r") as f:
         content = f.read()
     lines_raw = content.split("\n")
     lines_no_empty = filter(is_not_empty, lines_raw)
-    lines = filter(has_comments, lines_no_empty)
+    lines = filter(is_not_comment, lines_no_empty)
     return [parse_line(line) for line in lines]
 
 
@@ -103,8 +103,8 @@ def is_not_empty(line: str) -> bool:
 def is_empty(line: str) -> bool:
     if len(line) == 0:
         return True
-    return line.strip()[0] != "\n"
+    return not line.strip()[0] != "\n"
 
 
-def has_comments(line: str) -> bool:
+def is_not_comment(line: str) -> bool:
     return line.strip()[0] != "#"
