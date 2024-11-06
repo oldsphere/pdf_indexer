@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from PDFIndexer.index import add_index, add_index_offset, show_tree, read_index
 import argparse
 import sys
