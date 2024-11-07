@@ -61,7 +61,16 @@ def read_index(file: Path) -> List[IndexItem]:
     lines_raw = content.split("\n")
     lines_no_empty = filter(is_not_empty, lines_raw)
     lines = filter(is_not_comment, lines_no_empty)
-    return [parse_line(line) for line in lines]
+
+    index = []
+    for n_line, line in enumerate(lines):
+        try:
+            index.append(parse_line(line))
+        except ValueError as e:
+            raise ValueError(f'Error in Line {n_line} "{line}": {e}')
+        except Exception as e:
+            raise Exception(f'Unexpected error in Line {n_line} "{line}": {e}')
+    return index
 
 
 def parse_line(line: str) -> IndexItem:
